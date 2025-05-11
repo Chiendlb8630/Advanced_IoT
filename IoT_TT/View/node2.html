@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Agriculture Dashboard</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+  
+    h1 {
+      text-align: center;
+      color: #2d2d2d;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert {
+      border-left: 5px solid red;
+    }
+
+    .label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .label i {
+      width: 20px;
+      height: 20px;
+    }
+
+    .value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 50px;
+    }
+
+    .chart-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .charts canvas {
+      width: 100% !important;
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Smart Agriculture Dashboard</h1>
+  <div class="dashboard">
+
+    <!-- Temperature -->
+    <div class="card alert">
+      <div class="label">
+        <i data-lucide="thermometer" style="color:#ff3300;"></i>
+        Temperature
+      </div>
+      <div class="value">30.6 ℃</div>
+    </div>
+
+    <!-- Humidity -->
+    <div class="card">
+      <div class="label">
+        <i data-lucide="droplet" style="color:#00bfff;"></i>
+        Humidity
+      </div>
+      <div class="value">27%</div>
+    </div>
+
+    <!-- Light -->
+    <div class="card alert">
+      <div class="label">
+        <i data-lucide="sun" style="color:#ffaa00;"></i>
+        Light
+      </div>
+      <div class="value">1083 lux</div>
+    </div>
+
+    <!-- Soil Moisture -->
+    <div class="card">
+      <div class="label">
+        <i data-lucide="droplets" style="color:#3399ff;"></i>
+        Soil Moisture
+      </div>
+      <div class="value">48%</div>
+    </div>
+
+  </div>
+
+  <div class="dashboard" style="margin-top: 40px;">
+    <!-- LED Control -->
+    <div class="card">
+      <div class="label">
+        <i data-lucide="lightbulb" style="color:#fcd116;"></i>
+        LED Control
+      </div>
+      <div class="control">
+        <label class="switch">
+          <input type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Pump Control -->
+    <div class="card">
+      <div class="label">
+        <i data-lucide="droplet" style="color:#0066cc;"></i>
+        Pump Control
+      </div>
+      <div class="control">
+        <label class="switch">
+          <input type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-container">
+      <h3 style="text-align:center">Biểu đồ Nhiệt độ</h3>
+      <canvas id="tempChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 style="text-align:center">Biểu đồ Độ ẩm</h3>
+      <canvas id="humidityChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 style="text-align:center">Biểu đồ Độ ẩm đất</h3>
+      <canvas id="soilChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 style="text-align:center">Biểu đồ Ánh sáng</h3>
+      <canvas id="lightChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const labels = ['8h', '9h', '10h', '11h', '12h', '13h'];
+
+    new Chart(document.getElementById('tempChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: 'Temperature (℃)', data: [28.1, 29.3, 30.2, 31.0, 30.5, 29.8], borderColor: '#ff5733', fill: false }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: false } } }
+    });
+
+    new Chart(document.getElementById('humidityChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: 'Humidity (%)', data: [70, 65, 60, 58, 62, 64], borderColor: '#33c1ff', fill: false }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('soilChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: 'Soil moisture (%)', data: [45, 50, 48, 47, 49, 46], borderColor: '#3399ff', fill: false }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('lightChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: 'Light (lux)', data: [950, 1020, 1083, 1100, 980, 1005], borderColor: '#ffaa00', fill: false }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+  </script>
+</body>
+</html>

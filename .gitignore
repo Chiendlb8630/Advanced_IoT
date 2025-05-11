@@ -1,0 +1,8 @@
+
+node_modules/
+
+# Dependency cache (hiếm khi cần track)
+.npm/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
